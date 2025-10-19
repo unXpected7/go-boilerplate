@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/sriniously/go-boilerplate/internal/server"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/server"
 
 	"github.com/clerk/clerk-sdk-go/v2"
 )
@@ -11,7 +11,7 @@ type AuthService struct {
 }
 
 func NewAuthService(s *server.Server) *AuthService {
-	clerk.SetKey(s.Config.Auth.SecretKey)
+	clerk.SetKey(s.Config.AuthSecretKey)
 	return &AuthService{
 		server: s,
 	}

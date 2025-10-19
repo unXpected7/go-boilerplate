@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/resend/resend-go/v2"
 	"github.com/rs/zerolog"
-	"github.com/sriniously/go-boilerplate/internal/config"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/config"
 )
 
 type Client struct {
@@ -18,7 +18,7 @@ type Client struct {
 
 func NewClient(cfg *config.Config, logger *zerolog.Logger) *Client {
 	return &Client{
-		client: resend.NewClient(cfg.Integration.ResendAPIKey),
+		client: resend.NewClient(cfg.IntegrationResendAPIKey),
 		logger: logger,
 	}
 }

@@ -3,7 +3,7 @@ package job
 import (
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
-	"github.com/sriniously/go-boilerplate/internal/config"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/config"
 )
 
 type JobService struct {
@@ -13,7 +13,7 @@ type JobService struct {
 }
 
 func NewJobService(logger *zerolog.Logger, cfg *config.Config) *JobService {
-	redisAddr := cfg.Redis.Address
+	redisAddr := cfg.RedisAddress
 
 	client := asynq.NewClient(asynq.RedisClientOpt{
 		Addr: redisAddr,

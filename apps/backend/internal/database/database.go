@@ -14,8 +14,8 @@ import (
 	"github.com/jackc/pgx/v5/tracelog"
 	"github.com/newrelic/go-agent/v3/integrations/nrpgx5"
 	"github.com/rs/zerolog"
-	"github.com/sriniously/go-boilerplate/internal/config"
-	loggerConfig "github.com/sriniously/go-boilerplate/internal/logger"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/config"
+	loggerConfig "github.com/sriniously/go-boilerplate/apps/backend/internal/logger"
 )
 
 type Database struct {
@@ -54,16 +54,16 @@ func (mt *multiTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data p
 const DatabasePingTimeout = 10
 
 func New(cfg *config.Config, logger *zerolog.Logger, loggerService *loggerConfig.LoggerService) (*Database, error) {
-	hostPort := net.JoinHostPort(cfg.Database.Host, strconv.Itoa(cfg.Database.Port))
+	hostPort := net.JoinHostPort(cfg.DatabaseHost, strconv.Itoa(cfg.DatabasePort))
 
 	// URL-encode the password
-	encodedPassword := url.QueryEscape(cfg.Database.Password)
+	encodedPassword := url.QueryEscape(cfg.DatabasePassword)
 	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
-		cfg.Database.User,
+		cfg.DatabaseUser,
 		encodedPassword,
 		hostPort,
-		cfg.Database.Name,
-		cfg.Database.SSLMode,
+		cfg.DatabaseName,
+		cfg.DatabaseSSLMode,
 	)
 
 	pgxPoolConfig, err := pgxpool.ParseConfig(dsn)
@@ -76,7 +76,7 @@ func New(cfg *config.Config, logger *zerolog.Logger, loggerService *loggerConfig
 		pgxPoolConfig.ConnConfig.Tracer = nrpgx5.NewTracer()
 	}
 
-	if cfg.Primary.Env == "local" {
+	if cfg.PrimaryEnv == "local" {
 		globalLevel := logger.GetLevel()
 		pgxLogger := loggerConfig.NewPgxLogger(globalLevel)
 		// Chain tracers - New Relic first, then local logging

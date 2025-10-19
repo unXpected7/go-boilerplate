@@ -12,49 +12,31 @@ import (
 )
 
 type Config struct {
-	Primary       Primary              `koanf:"primary" validate:"required"`
-	Server        ServerConfig         `koanf:"server" validate:"required"`
-	Database      DatabaseConfig       `koanf:"database" validate:"required"`
-	Auth          AuthConfig           `koanf:"auth" validate:"required"`
-	Redis         RedisConfig          `koanf:"redis" validate:"required"`
-	Integration   IntegrationConfig    `koanf:"integration" validate:"required"`
+	PrimaryEnv           string   `koanf:"primary_env" validate:"required"`
+	ServerPort           string   `koanf:"server_port" validate:"required"`
+	ServerReadTimeout    int      `koanf:"server_read_timeout" validate:"required"`
+	ServerWriteTimeout   int      `koanf:"server_write_timeout" validate:"required"`
+	ServerIdleTimeout    int      `koanf:"server_idle_timeout" validate:"required"`
+	ServerCORSAllowedOrigins []string `koanf:"server_cors_allowed_origins" validate:"required"`
+
+	DatabaseHost         string `koanf:"database_host" validate:"required"`
+	DatabasePort         int    `koanf:"database_port" validate:"required"`
+	DatabaseUser         string `koanf:"database_user" validate:"required"`
+	DatabasePassword     string `koanf:"database_password"`
+	DatabaseName         string `koanf:"database_name" validate:"required"`
+	DatabaseSSLMode      string `koanf:"database_ssl_mode" validate:"required"`
+	DatabaseMaxOpenConns  int    `koanf:"database_max_open_conns" validate:"required"`
+	DatabaseMaxIdleConns  int    `koanf:"database_max_idle_conns" validate:"required"`
+	DatabaseConnMaxLifetime int `koanf:"database_conn_max_lifetime" validate:"required"`
+	DatabaseConnMaxIdleTime int `koanf:"database_conn_max_idle_time" validate:"required"`
+
+	RedisAddress         string `koanf:"redis_address" validate:"required"`
+
+	AuthSecretKey        string `koanf:"auth_secret_key" validate:"required"`
+
+	IntegrationResendAPIKey string `koanf:"integration_resend_api_key" validate:"required"`
+
 	Observability *ObservabilityConfig `koanf:"observability"`
-}
-
-type Primary struct {
-	Env string `koanf:"env" validate:"required"`
-}
-
-type ServerConfig struct {
-	Port               string   `koanf:"port" validate:"required"`
-	ReadTimeout        int      `koanf:"read_timeout" validate:"required"`
-	WriteTimeout       int      `koanf:"write_timeout" validate:"required"`
-	IdleTimeout        int      `koanf:"idle_timeout" validate:"required"`
-	CORSAllowedOrigins []string `koanf:"cors_allowed_origins" validate:"required"`
-}
-
-type DatabaseConfig struct {
-	Host            string `koanf:"host" validate:"required"`
-	Port            int    `koanf:"port" validate:"required"`
-	User            string `koanf:"user" validate:"required"`
-	Password        string `koanf:"password"`
-	Name            string `koanf:"name" validate:"required"`
-	SSLMode         string `koanf:"ssl_mode" validate:"required"`
-	MaxOpenConns    int    `koanf:"max_open_conns" validate:"required"`
-	MaxIdleConns    int    `koanf:"max_idle_conns" validate:"required"`
-	ConnMaxLifetime int    `koanf:"conn_max_lifetime" validate:"required"`
-	ConnMaxIdleTime int    `koanf:"conn_max_idle_time" validate:"required"`
-}
-type RedisConfig struct {
-	Address string `koanf:"address" validate:"required"`
-}
-
-type IntegrationConfig struct {
-	ResendAPIKey string `koanf:"resend_api_key" validate:"required"`
-}
-
-type AuthConfig struct {
-	SecretKey string `koanf:"secret_key" validate:"required"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -90,7 +72,7 @@ func LoadConfig() (*Config, error) {
 
 	// Override service name and environment from primary config
 	mainConfig.Observability.ServiceName = "boilerplate"
-	mainConfig.Observability.Environment = mainConfig.Primary.Env
+	mainConfig.Observability.Environment = mainConfig.PrimaryEnv
 
 	// Validate observability config
 	if err := mainConfig.Observability.Validate(); err != nil {

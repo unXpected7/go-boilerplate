@@ -4,57 +4,32 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	echoMiddleware "github.com/labstack/echo/v4/middleware"
-	"github.com/sriniously/go-boilerplate/internal/handler"
-	"github.com/sriniously/go-boilerplate/internal/middleware"
-	"github.com/sriniously/go-boilerplate/internal/server"
-	"github.com/sriniously/go-boilerplate/internal/service"
-	"golang.org/x/time/rate"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/handler"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/server"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/service"
 )
 
 func NewRouter(s *server.Server, h *handler.Handlers, services *service.Services) *echo.Echo {
-	middlewares := middleware.NewMiddlewares(s)
-
+	// For debugging, create a super simple echo server
 	router := echo.New()
 
-	router.HTTPErrorHandler = middlewares.Global.GlobalErrorHandler
+	// Add a single test route
+	router.GET("/", func(c echo.Context) error {
+		return c.String(200, "SUPER SIMPLE TEST ROUTE - THIS SHOULD WORK!")
+	})
 
-	// global middlewares
-	router.Use(
-		echoMiddleware.RateLimiterWithConfig(echoMiddleware.RateLimiterConfig{
-			Store: echoMiddleware.NewRateLimiterMemoryStore(rate.Limit(20)),
-			DenyHandler: func(c echo.Context, identifier string, err error) error {
-				// Record rate limit hit metrics
-				if rateLimitMiddleware := middlewares.RateLimit; rateLimitMiddleware != nil {
-					rateLimitMiddleware.RecordRateLimitHit(c.Path())
-				}
+	
+	s.Logger.Info().Msg("SUPER SIMPLE ROUTER CREATED")
+	s.Logger.Info().Msg("ROUTER CREATED")
 
-				s.Logger.Warn().
-					Str("request_id", middleware.GetRequestID(c)).
-					Str("identifier", identifier).
-					Str("path", c.Path()).
-					Str("method", c.Request().Method).
-					Str("ip", c.RealIP()).
-					Msg("rate limit exceeded")
-
-				return echo.NewHTTPError(http.StatusTooManyRequests, "Rate limit exceeded")
-			},
-		}),
-		middlewares.Global.CORS(),
-		middlewares.Global.Secure(),
-		middleware.RequestID(),
-		middlewares.Tracing.NewRelicMiddleware(),
-		middlewares.Tracing.EnhanceTracing(),
-		middlewares.ContextEnhancer.EnhanceContext(),
-		middlewares.Global.RequestLogger(),
-		middlewares.Global.Recover(),
-	)
-
-	// register system routes
-	registerSystemRoutes(router, h)
-
-	// register versioned routes
-	router.Group("/api/v1")
+	// Let's also create a standalone HTTP server for testing
+	standaloneServer := &http.Server{
+		Addr:    ":8081",
+		Handler: router,
+	}
+	go standaloneServer.ListenAndServe()
+	s.Logger.Info().Msg("Standalone server started on :8081")
 
 	return router
 }
+

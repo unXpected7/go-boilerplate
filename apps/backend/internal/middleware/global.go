@@ -7,9 +7,9 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
-	"github.com/sriniously/go-boilerplate/internal/errs"
-	"github.com/sriniously/go-boilerplate/internal/server"
-	"github.com/sriniously/go-boilerplate/internal/sqlerr"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/errs"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/server"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/sqlerr"
 )
 
 type GlobalMiddlewares struct {
@@ -24,7 +24,7 @@ func NewGlobalMiddlewares(s *server.Server) *GlobalMiddlewares {
 
 func (global *GlobalMiddlewares) CORS() echo.MiddlewareFunc {
 	return middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: global.server.Config.Server.CORSAllowedOrigins,
+		AllowOrigins: global.server.Config.ServerCORSAllowedOrigins,
 	})
 }
 

@@ -10,10 +10,10 @@ import (
 	"github.com/newrelic/go-agent/v3/integrations/nrredis-v9"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
-	"github.com/sriniously/go-boilerplate/internal/config"
-	"github.com/sriniously/go-boilerplate/internal/database"
-	"github.com/sriniously/go-boilerplate/internal/lib/job"
-	loggerPkg "github.com/sriniously/go-boilerplate/internal/logger"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/config"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/database"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/lib/job"
+	loggerPkg "github.com/sriniously/go-boilerplate/apps/backend/internal/logger"
 )
 
 type Server struct {
@@ -34,7 +34,7 @@ func New(cfg *config.Config, logger *zerolog.Logger, loggerService *loggerPkg.Lo
 
 	// Redis client with New Relic integration
 	redisClient := redis.NewClient(&redis.Options{
-		Addr: cfg.Redis.Address,
+		Addr: cfg.RedisAddress,
 	})
 
 	// Add New Relic Redis hooks if available
@@ -77,11 +77,11 @@ func New(cfg *config.Config, logger *zerolog.Logger, loggerService *loggerPkg.Lo
 
 func (s *Server) SetupHTTPServer(handler http.Handler) {
 	s.httpServer = &http.Server{
-		Addr:         ":" + s.Config.Server.Port,
+		Addr:         ":" + s.Config.ServerPort,
 		Handler:      handler,
-		ReadTimeout:  time.Duration(s.Config.Server.ReadTimeout) * time.Second,
-		WriteTimeout: time.Duration(s.Config.Server.WriteTimeout) * time.Second,
-		IdleTimeout:  time.Duration(s.Config.Server.IdleTimeout) * time.Second,
+		ReadTimeout:  time.Duration(s.Config.ServerReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(s.Config.ServerWriteTimeout) * time.Second,
+		IdleTimeout:  time.Duration(s.Config.ServerIdleTimeout) * time.Second,
 	}
 }
 
@@ -91,8 +91,8 @@ func (s *Server) Start() error {
 	}
 
 	s.Logger.Info().
-		Str("port", s.Config.Server.Port).
-		Str("env", s.Config.Primary.Env).
+		Str("port", s.Config.ServerPort).
+		Str("env", s.Config.PrimaryEnv).
 		Msg("starting server")
 
 	return s.httpServer.ListenAndServe()

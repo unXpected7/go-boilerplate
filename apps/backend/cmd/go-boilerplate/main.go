@@ -8,14 +8,14 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/sriniously/go-boilerplate/internal/config"
-	"github.com/sriniously/go-boilerplate/internal/database"
-	"github.com/sriniously/go-boilerplate/internal/handler"
-	"github.com/sriniously/go-boilerplate/internal/logger"
-	"github.com/sriniously/go-boilerplate/internal/repository"
-	"github.com/sriniously/go-boilerplate/internal/router"
-	"github.com/sriniously/go-boilerplate/internal/server"
-	"github.com/sriniously/go-boilerplate/internal/service"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/config"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/database"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/handler"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/logger"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/repository"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/router"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/server"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/service"
 )
 
 const DefaultContextTimeout = 30
@@ -32,7 +32,7 @@ func main() {
 
 	log := logger.NewLoggerWithService(cfg.Observability, loggerService)
 
-	if cfg.Primary.Env != "local" {
+	if true { // Force migrations to run for now
 		if err := database.Migrate(context.Background(), &log, cfg); err != nil {
 			log.Fatal().Err(err).Msg("failed to migrate database")
 		}

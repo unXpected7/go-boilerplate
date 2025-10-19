@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
-	"github.com/sriniously/go-boilerplate/internal/config"
-	"github.com/sriniously/go-boilerplate/internal/database"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/config"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/database"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -64,37 +64,30 @@ func SetupTestDB(t *testing.T) (*TestDB, func()) {
 
 	// Create configuration
 	cfg := &config.Config{
-		Database: config.DatabaseConfig{
-			Host:            host,
-			Port:            port,
-			User:            dbUser,
-			Password:        dbPassword,
-			Name:            dbName,
-			SSLMode:         "disable",
-			MaxOpenConns:    25,
-			MaxIdleConns:    25,
-			ConnMaxLifetime: 300,
-			ConnMaxIdleTime: 300,
-		},
-		Primary: config.Primary{
-			Env: "test",
-		},
-		Server: config.ServerConfig{
-			Port:               "8080",
-			ReadTimeout:        30,
-			WriteTimeout:       30,
-			IdleTimeout:        30,
-			CORSAllowedOrigins: []string{"*"},
-		},
-		Integration: config.IntegrationConfig{
-			ResendAPIKey: "test-key",
-		},
-		Redis: config.RedisConfig{
-			Address: "localhost:6379",
-		},
-		Auth: config.AuthConfig{
-			SecretKey: "test-secret",
-		},
+		DatabaseHost:         host,
+		DatabasePort:         port,
+		DatabaseUser:         dbUser,
+		DatabasePassword:     dbPassword,
+		DatabaseName:         dbName,
+		DatabaseSSLMode:      "disable",
+		DatabaseMaxOpenConns: 25,
+		DatabaseMaxIdleConns: 25,
+		DatabaseConnMaxLifetime: 300,
+		DatabaseConnMaxIdleTime: 300,
+
+		PrimaryEnv:           "test",
+
+		ServerPort:           "8080",
+		ServerReadTimeout:    30,
+		ServerWriteTimeout:   30,
+		ServerIdleTimeout:    30,
+		ServerCORSAllowedOrigins: []string{"*"},
+
+		IntegrationResendAPIKey: "test-key",
+
+		RedisAddress:         "localhost:6379",
+
+		AuthSecretKey:        "test-secret",
 	}
 
 	logger := zerolog.New(zerolog.NewConsoleWriter()).With().Timestamp().Logger()

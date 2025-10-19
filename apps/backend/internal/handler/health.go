@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sriniously/go-boilerplate/internal/middleware"
-	"github.com/sriniously/go-boilerplate/internal/server"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/middleware"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/server"
 
 	"github.com/labstack/echo/v4"
 )
@@ -31,7 +31,7 @@ func (h *HealthHandler) CheckHealth(c echo.Context) error {
 	response := map[string]interface{}{
 		"status":      "healthy",
 		"timestamp":   time.Now().UTC(),
-		"environment": h.server.Config.Primary.Env,
+		"environment": h.server.Config.PrimaryEnv,
 		"checks":      make(map[string]interface{}),
 	}
 

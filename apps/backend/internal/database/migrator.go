@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/sriniously/go-boilerplate/internal/config"
+	"github.com/sriniously/go-boilerplate/apps/backend/internal/config"
 
 	"github.com/jackc/pgx/v5"
 	tern "github.com/jackc/tern/v2/migrate"
@@ -20,16 +20,16 @@ import (
 var migrations embed.FS
 
 func Migrate(ctx context.Context, logger *zerolog.Logger, cfg *config.Config) error {
-	hostPort := net.JoinHostPort(cfg.Database.Host, strconv.Itoa(cfg.Database.Port))
+	hostPort := net.JoinHostPort(cfg.DatabaseHost, strconv.Itoa(cfg.DatabasePort))
 
 	// URL-encode the password
-	encodedPassword := url.QueryEscape(cfg.Database.Password)
+	encodedPassword := url.QueryEscape(cfg.DatabasePassword)
 	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
-		cfg.Database.User,
+		cfg.DatabaseUser,
 		encodedPassword,
 		hostPort,
-		cfg.Database.Name,
-		cfg.Database.SSLMode,
+		cfg.DatabaseName,
+		cfg.DatabaseSSLMode,
 	)
 
 	conn, err := pgx.Connect(ctx, dsn)
