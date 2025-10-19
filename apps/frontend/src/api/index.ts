@@ -8,6 +8,16 @@ import axios, {
   isAxiosError,
   type AxiosResponse,
 } from "axios";
+import {
+  type Schedule,
+  type Stats,
+  type StartVisitRequest,
+  type EndVisitRequest,
+  type UpdateTaskRequest,
+  type Location,
+  type ApiResponse,
+  type PaginatedResponse,
+} from "./types";
 
 type Headers = Awaited<
   ReturnType<NonNullable<Parameters<typeof initClient>[1]["api"]>>
@@ -68,4 +78,64 @@ export const useApiClient = ({ isBlob = false }: { isBlob?: boolean } = {}) => {
       return makeRequest();
     },
   });
+};
+
+// EVV Specific API Functions
+export const evvApi = {
+  // Schedule APIs
+  getSchedules: async (client: TApiClient): Promise<Schedule[]> => {
+    const result = await client.schedules.get({});
+    return result.body.data;
+  },
+
+  getSchedulesToday: async (client: TApiClient): Promise<Schedule[]> => {
+    const result = await client.schedules.getToday({});
+    return result.body.data;
+  },
+
+  getScheduleById: async (client: TApiClient, id: string): Promise<Schedule> => {
+    const result = await client.schedules.getById({ path: { id } });
+    return result.body.data;
+  },
+
+  // Visit APIs
+  startVisit: async (
+    client: TApiClient,
+    scheduleId: string,
+    location: Location
+  ): Promise<void> => {
+    await client.schedules.startVisit({
+      path: { id: scheduleId },
+      body: { location },
+    });
+  },
+
+  endVisit: async (
+    client: TApiClient,
+    scheduleId: string,
+    location: Location
+  ): Promise<void> => {
+    await client.schedules.endVisit({
+      path: { id: scheduleId },
+      body: { location },
+    });
+  },
+
+  // Task APIs
+  updateTask: async (
+    client: TApiClient,
+    taskId: string,
+    data: UpdateTaskRequest
+  ): Promise<void> => {
+    await client.tasks.updateTask({
+      path: { taskId },
+      body: data,
+    });
+  },
+
+  // Stats API
+  getStats: async (client: TApiClient): Promise<Stats> => {
+    const result = await client.schedules.getStats({});
+    return result.body.data;
+  },
 };

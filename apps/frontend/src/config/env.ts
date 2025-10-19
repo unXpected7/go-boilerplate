@@ -4,7 +4,7 @@ const envVarsSchema = z.object({
   VITE_CLERK_PUBLISHABLE_KEY: z
     .string()
     .min(1, "VITE_CLERK_PUBLISHABLE_KEY is required"),
-  VITE_API_URL: z.url().default("http://localhost:3000"),
+  VITE_API_URL: z.url().default("http://localhost:9090"),
   VITE_ENV: z.enum(["production", "development", "local"]).default("local"),
 });
 
