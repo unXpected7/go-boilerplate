@@ -1,158 +1,254 @@
-# Go Boilerplate
+# Mini EVV Logger
 
-A production-ready monorepo template for building scalable web applications with Go backend and TypeScript frontend. Built with modern best practices, clean architecture, and comprehensive tooling.
+A comprehensive Electronic Visit Logger (EVV) system for caregiver shift tracking with geolocation support.
 
 ## Features
 
-- **Monorepo Structure**: Organized with Turborepo for efficient builds and development
-- **Go Backend**: High-performance REST API with Echo framework
-- **Authentication**: Integrated Clerk SDK for secure user management
-- **Database**: PostgreSQL with migrations and connection pooling
-- **Background Jobs**: Redis-based async job processing with Asynq
-- **Observability**: New Relic APM integration and structured logging
-- **Email Service**: Transactional emails with Resend and HTML templates
-- **Testing**: Comprehensive test infrastructure with Testcontainers
-- **API Documentation**: OpenAPI/Swagger specification
-- **Security**: Rate limiting, CORS, secure headers, and JWT validation
+- **Schedule Management**: Create, read, update, delete caregiver schedules
+- **Visit Tracking**: Track visits with geolocation coordinates and timing
+- **Task Management**: Monitor task completion with detailed status tracking
+- **Search & Pagination**: Advanced search with pagination support
+- **Statistics & Analytics**: Schedule completion metrics and analytics
+- **REST API**: Full REST API with proper HTTP methods and validation
+- **Docker Support**: Complete Docker and Docker Compose configuration
+- **Testing**: Comprehensive unit and integration test coverage
 
-## Project Structure
+## Architecture
 
-```
-go-boilerplate/
-├── apps/backend/          # Go backend application
-├── packages/         # Frontend packages (React, Vue, etc.)
-├── package.json      # Monorepo configuration
-├── turbo.json        # Turborepo configuration
-└── README.md         # This file
-```
+### Backend (Go + Echo Framework)
+- **Framework**: Echo web framework
+- **Database**: PostgreSQL with proper migrations
+- **Architecture**: Clean architecture with separation of concerns
+- **Validation**: Comprehensive input validation
+- **Documentation**: OpenAPI/Swagger documentation
+
+### Frontend (React + TypeScript)
+- **Framework**: React with TypeScript
+- **State Management**: React Query for data fetching
+- **Routing**: React Router for navigation
+- **UI Components**: Modern responsive design
+- **Build Tool**: Vite
 
 ## Quick Start
 
 ### Prerequisites
+- Docker and Docker Compose
+- PostgreSQL (optional, if running locally)
 
-- Go 1.24 or higher
-- Node.js 22+ and Bun
-- PostgreSQL 16+
-- Redis 8+
+### Development Setup
 
-### Installation
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd go-boilerplate
+   ```
 
-1. Clone the repository:
+2. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. **Start the application**
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Access the application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8080
+   - API Documentation: http://localhost:8080/swagger/index.html
+
+### Manual Setup
+
+#### Backend
 ```bash
-git clone https://github.com/sriniously/go-boilerplate.git
-cd go-boilerplate
-```
-
-2. Install dependencies:
-```bash
-# Install frontend dependencies
-bun install
-
-# Install backend dependencies
 cd apps/backend
+
+# Install dependencies
 go mod download
+
+# Set up database
+createdb evv_db
+goose postgres "user=evv_user password=evv_password dbname=evv_db sslmode=disable" up
+
+# Run the application
+go run main.go
 ```
 
-3. Set up environment variables:
+#### Frontend
 ```bash
-cp apps/backend/.env.example apps/backend/.env
-# Edit apps/backend/.env with your configuration
+cd apps/frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-4. Start the database and Redis.
+## API Endpoints
 
-5. Run database migrations:
-```bash
-cd apps/backend
-task migrations:up
-```
+### Schedules
+- `GET /api/schedules` - Get all schedules with pagination
+- `GET /api/schedules/today` - Get today's schedules
+- `GET /api/schedules/:id` - Get schedule by ID
+- `POST /api/schedules` - Create new schedule
+- `PUT /api/schedules/:id` - Update schedule
+- `PUT /api/schedules/:id/status` - Update schedule status
+- `DELETE /api/schedules/:id` - Delete schedule
+- `GET /api/schedules/search?q=query` - Search schedules
 
-6. Start the development server:
-```bash
-# From root directory
-bun dev
+### Visits
+- `GET /api/schedules/:id/visits` - Get visits for schedule
+- `POST /api/schedules/:id/visits/start` - Start visit
+- `PUT /api/visits/:id/end` - End visit
+- `GET /api/schedules/:id/visit-exists` - Check if visit exists
 
-# Or just the backend
-cd apps/backend
-task run
-```
+### Tasks
+- `GET /api/schedules/:id/tasks` - Get tasks for schedule
+- `POST /api/schedules/:id/tasks` - Create task
+- `PUT /api/tasks/:id/status` - Update task status
 
-The API will be available at `http://localhost:8080`
+### Statistics
+- `GET /api/schedules/statistics` - Get schedule statistics
+
+## Database Schema
+
+### Schedules Table
+- `id` (UUID) - Primary key
+- `client_name` (VARCHAR) - Client name
+- `shift_time` (VARCHAR) - Shift time (HH:MM-HH:MM)
+- `location` (VARCHAR) - Service location
+- `status` (VARCHAR) - Schedule status (upcoming, in_progress, completed, missed)
+- `visit_id` (UUID) - Reference to visit
+- `created_at` (TIMESTAMP) - Creation timestamp
+- `updated_at` (TIMESTAMP) - Last update timestamp
+
+### Visits Table
+- `id` (UUID) - Primary key
+- `schedule_id` (UUID) - Foreign key to schedules
+- `start_time` (TIMESTAMP) - Visit start time
+- `end_time` (TIMESTAMP) - Visit end time
+- `start_latitude` (DECIMAL) - Start latitude
+- `start_longitude` (DECIMAL) - Start longitude
+- `end_latitude` (DECIMAL) - End latitude
+- `end_longitude` (DECIMAL) - End longitude
+- `status` (VARCHAR) - Visit status
+- `duration_minutes` (INTEGER) - Visit duration
+- `created_at` (TIMESTAMP) - Creation timestamp
+- `updated_at` (TIMESTAMP) - Last update timestamp
+
+### Tasks Table
+- `id` (UUID) - Primary key
+- `schedule_id` (UUID) - Foreign key to schedules
+- `name` (VARCHAR) - Task name
+- `description` (TEXT) - Task description
+- `status` (VARCHAR) - Task status (pending, completed, not_completed)
+- `reason` (TEXT) - Reason for not completion
+- `completed_at` (TIMESTAMP) - Completion timestamp
+- `created_at` (TIMESTAMP) - Creation timestamp
+- `updated_at` (TIMESTAMP) - Last update timestamp
 
 ## Development
 
-### Available Commands
-
+### Backend Development
 ```bash
-# Backend commands (from backend/ directory)
-task help              # Show all available tasks
-task run               # Run the application
-task migrations:new    # Create a new migration
-task migrations:up     # Apply migrations
-task test              # Run tests
-task tidy              # Format code and manage dependencies
-
-# Frontend commands (from root directory)
-bun dev                # Start development servers
-bun build              # Build all packages
-bun lint               # Lint all packages
-```
-
-### Environment Variables
-
-The backend uses environment variables prefixed with `BOILERPLATE_`. Key variables include:
-
-- `BOILERPLATE_DATABASE_*` - PostgreSQL connection settings
-- `BOILERPLATE_SERVER_*` - Server configuration
-- `BOILERPLATE_AUTH_*` - Authentication settings
-- `BOILERPLATE_REDIS_*` - Redis connection
-- `BOILERPLATE_EMAIL_*` - Email service configuration
-- `BOILERPLATE_OBSERVABILITY_*` - Monitoring settings
-
-See `apps/backend/.env.example` for a complete list.
-
-## Architecture
-
-This boilerplate follows clean architecture principles:
-
-- **Handlers**: HTTP request/response handling
-- **Services**: Business logic implementation
-- **Repositories**: Data access layer
-- **Models**: Domain entities
-- **Infrastructure**: External services (database, cache, email)
-
-## Testing
-
-```bash
-# Run backend tests
 cd apps/backend
-go test ./...
 
-# Run with coverage
-go test -cover ./...
+# Run tests
+go test -v ./...
 
-# Run integration tests (requires Docker)
-go test -tags=integration ./...
+# Run tests with coverage
+go test -v -cover ./...
+
+# Run specific test
+go test -v ./internal/service/...
+
+# Run linting
+go fmt ./...
+go vet ./...
+
+# Build the application
+go build -o main .
 ```
 
-### Production Considerations
+### Frontend Development
+```bash
+cd apps/frontend
 
-1. Use environment-specific configuration
-2. Enable production logging levels
-3. Configure proper database connection pooling
-4. Set up monitoring and alerting
-5. Use a reverse proxy (nginx, Caddy)
-6. Enable rate limiting and security headers
-7. Configure CORS for your domains
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run linting
+npm run lint
+
+# Build the application
+npm run build
+```
+
+### Code Quality
+- Follow Go conventions for backend code
+- Use TypeScript for frontend development
+- Write comprehensive tests
+- Maintain proper documentation
+- Follow REST API best practices
+
+## Deployment
+
+### Docker Deployment
+```bash
+# Build and start all services
+docker-compose up -d
+
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Production Deployment
+1. Update environment variables for production
+2. Use production database configuration
+3. Configure SSL certificates
+4. Set up proper logging and monitoring
+5. Use orchestration tools like Kubernetes for scaling
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SERVER_PORT` | Backend server port | 8080 |
+| `DB_HOST` | Database host | localhost |
+| `DB_PORT` | Database port | 5432 |
+| `DB_NAME` | Database name | evv_db |
+| `DB_USER` | Database username | evv_user |
+| `DB_PASSWORD` | Database password | evv_password123 |
+| `REDIS_HOST` | Redis host | localhost |
+| `REDIS_PORT` | Redis port | 6379 |
+| `CORS_ORIGIN` | CORS allowed origin | http://localhost:3000 |
+| `ENVIRONMENT` | Environment | development |
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
+
+## Support
+
+For support and questions, please open an issue in the repository.
